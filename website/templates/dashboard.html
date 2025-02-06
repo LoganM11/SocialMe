@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+
+{% block nav_right_sect %}
+    <button onclick="location.href='/logout'">Logout</button>
+{% endblock %}
+
+{% block content %}
+    <div class="form-container">your id is {{ user.id }} and your name is {{ user.name }} your email is {{ user.email }} and your password is {{ user.password }}</div>
+{% endblock %}
