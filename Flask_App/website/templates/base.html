@@ -1,0 +1,39 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    {% block nav %}
+    <div class="navbar">
+        <div class="nav-left">
+            {% block nav_left_sect %}
+            <button onclick="location.href='/login'">Login</button>
+            <button onclick="location.href='/sign-up'">Sign Up</button>
+            <button onclick="location.href='/logout'">Logout</button>
+            {% endblock %}
+        </div>
+        <div class="nav-center">
+            Website
+        </div>
+        <div class="nav-right">
+            {% block nav_right_sect %}
+            <button onclick="location.href='/'">Home</button>
+            <button onclick="location.href='/'">Back</button>
+            <button onclick="location.href='/dashboard'">Dashboard</button>
+            {% endblock %}
+        </div>
+    </div>
+    {% endblock %}
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+    <script> 
+        type="text/javascript" 
+        src="{{ url_for('static', filename='js/index.js') }}"
+    </script>
+</body>
+</html>
