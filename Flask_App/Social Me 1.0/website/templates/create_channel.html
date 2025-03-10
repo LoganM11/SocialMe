@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block nav_left_sect %}
+    <button class="a" onclick="location.href='{{ url_for('views.view_channel', account_id=account.id, status=400) }}'">&#10148;</button>
+
+{% endblock %}
+
+{% block nav_right_sect %}
+    <button onclick="location.href='{{ url_for('auth.logout') }}'">Logout</button>
+{% endblock %}
+
+{% block content %}
+    <div id="wider-form" class="form-container">
+        <form action="{{ url_for('views.create_channel', account_id=account.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="custom-select-wrapper">
+                <div class="custom-select">
+                    <div class="custom-select-trigger">
+                        <span class="select-plat">Select Platform</span>
+                        <div class="arrow"></div>
+                    </div>
+                    <div class="custom-options">
+                        {% set platform_numbers = [] %}
+                        {% for channel in account.channels %}
+                            {% if channel.platform_number not in platform_numbers %}
+                                {% set _ = platform_numbers.append(channel.platform_number) %}
+                            {% endif %}
+                        {% endfor %}   
+
+                        {% for num in [1,3,6] %}
+                            {% if num not in platform_numbers %}
+                            <span class="custom-option" data-value="{{ num }}">
+                                <label class="option-text">{{ image_dict[num][1] }}</label>
+                                <img class="small-image" src="{{ url_for('static', filename=image_dict[num][0]) }}" alt="Logo">
+                            </span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <input type="hidden" id="platform" name="platform" required>
+            </div>
+            <input type="text" id="wide" name="channel-name" placeholder="Channel Name" maxlength="100">
+            <input type="text" id="wide" name="channel-username" placeholder="Channel Username" maxlength="100">
+            <input type="text" id="wide" name="channel-password" placeholder="Channel Password" maxlength="100">
+            
+            <a class="aa aaa" onclick="window.open('/info', '_blank')">For more information click here</a>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'error' %}
+                            <div class="error">
+                                {{ message|safe }}
+                            </div>
+                        {% endif %}
+                        {% if category == 'success' %}
+                            <div class="success">
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                        {% if category == 'none' %}
+                        <div class="none">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <button id="wskinny-button" type="submit">Link Channel</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const trigger = document.querySelector('.custom-select-trigger');
+            const options = document.querySelector('.custom-options');
+            const wrapper = document.querySelector('.custom-select-wrapper');
+            const hiddenInput = document.getElementById('platform');
+    
+            trigger.addEventListener('click', function () {
+                options.classList.toggle('hidden');
+            });
+    
+            wrapper.addEventListener('mouseover', function () {
+                options.classList.remove('hidden');
+            });
+    
+            wrapper.addEventListener('mouseout', function () {
+                if (!options.classList.contains('selecteds')) {
+                    options.classList.add('hidden');
+                }
+            });
+    
+            document.querySelectorAll(".custom-option").forEach(option => {
+                option.addEventListener('click', function () {
+                    document.querySelectorAll(".custom-option").forEach(opt => opt.classList.remove('selecteds'));
+                    this.classList.add('selecteds');
+    
+                    // Set trigger text and hidden input value
+                    trigger.querySelector('.select-plat').textContent = this.querySelector('.option-text').textContent;
+                    hiddenInput.value = this.getAttribute('data-value');
+    
+                    options.classList.add('hidden');
+                });
+            });
+    
+            // Add the extra class to the last custom option
+            const lastOption = options.querySelector('.custom-option:last-child');
+            if (lastOption) {
+                lastOption.classList.add('other-option');
+            }
+        });
+    </script>
+    
+{% endblock %}

@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block nav_left_sect %}
+<button class="a" onclick="location.href='/upload'">&#10148;</button>
+
+
+{% endblock %}
+
+{% block nav_right_sect %}
+<button onclick="location.href='{{ url_for('auth.logout') }}'">Logout</button>
+{% endblock %}
+
+{% block content_tents %}
+<div id="dash-fix" class="dash">
+    <div class="row">
+        {% if account.channels|length > 0 %}
+            <div class="upload">
+                <form id="testForm" enctype="multipart/form-data" action="{{ url_for('views.upload_videos', account_id=account.id) }}" class="upload_form" method="post" onsubmit="updatePlatformsInput()">
+                    <div class="row-even">
+                        <label class="file-upload" for="videoInput">
+                            <input type="file" id="videoInput" name="video" accept="video/*" hidden>
+                            <i id="upload-icon" class="fa-solid fa-upload"></i>
+                            <video id="videoPreview" class="preview" hidden></video>
+                        </label>
+                        <div class="text-group">
+                            <input class="better" type="text" name="title" placeholder="Title" maxlength="50">
+                            <textarea class="better-two" name="description" rows="4" cols="50" placeholder="Description" maxlength="300"></textarea>                    
+                        </div>
+                    </div>
+                    <input class="better-three" type="text" name="tags" placeholder="Tags" maxlength="500">  
+                    <input type="hidden" name="platforms" id="platformsInput">
+                    <div class="logo-row">
+                        {% set platform_numbers = [] %}
+                        {% for channel in account.channels %}
+                            {% if channel.platform_number not in platform_numbers %}
+                                {% set _ = platform_numbers.append(channel.platform_number) %}
+                            {% endif %}
+                        {% endfor %}   
+                        {% for num in range(1, 7) %}
+                            {% if num in platform_numbers %}
+                            <img class="mid-image" src="{{ url_for('static', filename=image_dict[num][0]) }}" alt="Logo" onclick="toggleSelection(this, {{ num }})">                       
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="upload-span">
+                        Upload
+                    </button>
+                </form>                
+            </div>
+        {% endif %}
+
+        <div class="channels">
+            <a class="aa" onclick="window.open('/info', '_blank')">For more information click here</a>
+
+            {% for channel in account.channels %}
+                <div class="channel-card">  
+                    <div class="group">
+                        <div class="platform-logo">
+                            {% if channel.platform_number in image_dict %}
+                                <img class="smaller-pic" src="{{ url_for('static', filename=image_dict[channel.platform_number][0]) }}" 
+                                    alt="{{ image_dict[channel.platform_number][1] }}">
+                            {% else %}
+                                <p>Unknown Platform</p>
+                            {% endif %}                        
+                        </div>
+                        {% if channel.platform_number == 1 %}
+                            <a href="https://www.instagram.com/{{ channel.uname }}" id="idw" class="idk" target="_blank">
+                        {% elif channel.platform_number == 2 %}
+                            <a href="https://www.linkedin.com/in/{{ channel.uname }}" id="idw" class="idk" target="_blank">
+                        {% elif channel.platform_number == 3 %}
+                            <a href="https://www.snapchat.com/add/{{ channel.uname }}" id="idw" class="idk" target="_blank">
+                        {% elif channel.platform_number == 4 %}
+                            <a href="https://www.tiktok.com/@{{ channel.uname }}" id="idw" class="idk" target="_blank">
+                        {% elif channel.platform_number == 5 %}
+                            <a href="https://twitter.com/{{ channel.uname }}" id="idw" class="idk" target="_blank">
+                        {% elif channel.platform_number == 6 %}
+                            <a href="https://studio.youtube.com" id="idw" class="idk" target="_blank">
+                        {% endif %}
+                            <h2 class="name under" >{{ channel.channel_name }}</h2>
+                            <div class="seperate-wide"></div>
+                            <div class="storage">
+                                <h2 class="nothover">Username</h2>
+                                <h2 class="whenhover">{{ channel.uname }}</h2>                                
+                            </div>
+                            <div class="storage">
+                                <h2 class="nothover name">Password</h2>
+                                <h2 class="whenhover">{{ channel.pword }}</h2>                                
+                            </div>
+
+
+                        </a>  
+                    </div>                                               
+                    <form action="{{ url_for('views.delete_channel', channel_id=channel.id) }}" method="POST" class="delete-form">
+                        <button type="submit" class="delete">
+                            <i id="delete-icon" class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>                    
+                </div>
+            {% endfor %}
+            {% if account.channels|length < 3 %}
+                <button id="add-account" class="channel-card addd" onclick="window.location.href='{{ url_for('views.create_channel', account_id=account.id) }}'">
+                    <span id="add-add">+</span>
+                </button>
+            {% endif %}
+            
+            <div class="bottom"></div>
+        </div>
+    </div>
+</div>
+<div class="response-overlay" id="responseOverlay">
+    <div class="response">
+        <div id="responseContainer">
+            <button class="close-btn" onclick="closeMessage()">&times;</button>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<script>
+    
+    const videoInput = document.getElementById('videoInput');
+    const videoPreview = document.getElementById('videoPreview');
+    const uploadIcon = document.getElementById('upload-icon');
+
+    videoInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const fileURL = URL.createObjectURL(file);
+            videoPreview.src = fileURL;
+            videoPreview.hidden = false;
+            videoPreview.controls = true; // To show video controls like play, pause, etc.
+        }
+    });
+
+
+    const selectedPlatforms = new Set();
+
+    function showMessage() {
+        let overlay = document.getElementById('responseOverlay');
+        overlay.style.visibility = 'visible';
+        overlay.style.opacity = '1';
+    }
+
+    function closeMessage() {
+        let overlay = document.getElementById('responseOverlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.visibility = 'hidden';
+        }, 300);
+    }
+
+    function checkStatus(status) {
+        console.log("checkStatus called with:", status);
+        let message = '';
+        let messageType = '';
+
+        switch (status) {
+            case 900:
+                message = "Please install google chrome"
+                messageType = 'error';
+            case 201:
+                message = 'Channel Successfuly Linked!';
+                messageType = 'success';
+                break;
+            case 101:
+                message = 'Cannot upload video of type none';
+                messageType = 'error';
+                break;
+            case 102:
+                message = 'Cannot upload video to platform of none';
+                messageType = 'error';
+                break;
+            case 103:
+                message = 'One or more videos failed to upload';
+                messageType = 'error';
+                break;
+            case 300:
+                message = 'Videos uploaded without errors';
+                messageType = 'success';
+                break;
+            case 301:
+                message = 'Videos uploaded with errors';
+                messageType = 'error';
+                break;
+            case 302:
+                message = 'Some or all videos failed to upload';
+                messageType = 'error';
+                break;
+            case 303:
+                message = 'Cookies failed to generate';
+                messageType = 'error';
+                break;
+            default:
+                console.log("Invalid status:", status);
+                return;
+        }
+
+        console.log("Displaying message:", message);
+        document.getElementById('responseContainer').innerHTML = message +
+            '<button class="close-btn" onclick="closeMessage()">&times;</button>';
+            message;
+        // Clear existing status classes
+        document.getElementById('responseContainer').classList.remove('error', 'success');
+
+        // Add the new class based on status
+        document.getElementById('responseContainer').classList.add(messageType);
+        const url = new URL(window.location.href);
+        
+        // Split the pathname to get the segments
+        const segments = url.pathname.split('/');
+        
+        // Replace the third segment (index 3) with 300
+        if (segments.length >= 4) {
+            segments[3] = '300';
+            url.pathname = segments.join('/');
+        }
+        
+        // Update the URL without reloading the page
+        window.history.replaceState({}, '', url);
+    
+        showMessage();
+    }
+
+    // Using the status variable passed from the server
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log('checking status from server side');
+        let status = {{ status }};
+        if (status !== null) {
+            console.log('status not null');
+            checkStatus(status);
+        }
+    });
+
+    let platforms = new Set();
+
+    function toggleSelection(img, num) {
+        if (img.classList.contains('selected')) {
+            img.classList.remove('selected');
+            platforms.delete(num);
+        } else {
+            img.classList.add('selected');
+            platforms.add(num);
+        }
+    }
+
+    function updatePlatformsInput() {
+        const platformsArray = Array.from(platforms);
+        document.getElementById('platformsInput').value = JSON.stringify(platformsArray);
+    }
+</script>
+{% endblock %}

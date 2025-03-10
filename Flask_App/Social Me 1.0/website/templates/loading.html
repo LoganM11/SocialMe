@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block nav %}{% endblock %}
+
+
+
+{% block content %}
+    <div class="n">
+    <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+    <div class="phrase" id="phrase">Generating cookies...</div>
+    <script>
+        const phrases = [
+            "Still generating cookies...",
+            "Do you want some...",
+            "I could share...",
+            "But do I want to...",
+            "No...",
+            "My cookies..."
+        ];
+        let phraseIndex = 0;
+
+        function updatePhrase() {
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            const phraseElement = document.getElementById("phrase");
+            phraseElement.style.animation = 'none';
+            void phraseElement.offsetWidth;
+            phraseElement.textContent = phrases[phraseIndex];
+            phraseElement.style.animation = 'fadeIn 6s infinite ease-in-out';
+        }
+        setInterval(updatePhrase, 6000);
+    </script>
+    <script>
+        function checkStatus() {
+            fetch("/channel_status/{{ new_channel.id }}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "complete") {
+                    window.location.href = `/view_channel/{{ account_id }}/{{ 201 }}`;
+                } else if (data.status === "error") {
+                    window.location.href = `/view_channel/{{ account_id }}/{{ 303 }}`;
+                } else {
+                    setTimeout(checkStatus, 2000);
+                }
+            });
+        }
+        checkStatus();
+    </script>        
+    </div>
+
+{% endblock %}

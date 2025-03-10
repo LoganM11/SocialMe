@@ -1,0 +1,46 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Social Me{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+    {% block nav %}
+    <div class="navbar">
+        <div class="nav-left">
+            {% block nav_left_sect %}
+            <button onclick="location.href='/login'">Login</button>
+            <button onclick="location.href='/sign-up'">Sign Up</button>
+            <button onclick="location.href='/logout'">Logout</button>
+            {% endblock %}
+        </div>
+        <div class="nav-center">
+            Social Me
+        </div>
+        <div class="nav-right">
+            {% block nav_right_sect %}
+            <button onclick="location.href='/'">Home</button>
+            <button onclick="location.href='/'">Back</button>
+            <button onclick="location.href='/dashboard'">Dashboard</button>
+            {% endblock %}
+        </div>
+    </div>
+    {% endblock %}
+    {% block content_tents %}
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        {% block extra1 %}{% endblock %}
+    {% endblock %}
+    <script> 
+        type="text/javascript" 
+        src="{{ url_for('static', filename='js/index.js') }}"
+    </script>
+    <body>
+</body>
+</html>
